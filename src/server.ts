@@ -1,6 +1,7 @@
 import express from "express";
 import { Request, Response, Router } from "express";
 import {ProductsRepository} from "./ProductsRepository";
+import { Product } from "./product";
 import { close } from "fs";
 
 const app = express();
@@ -24,20 +25,36 @@ routes.get('/getAllProducts', async(req: Request, res: Response)=>{
     res.send(products);
 });
 
+routes.put('/updateProduct', async(req:Request,res:Response)=>{
+
+    const {id, name, price, description} = req.body;
+    const newProd = new Product(name,price,description,id);
+
+    if(id == undefined) res.status(500).send({error:"id não está presente"})
+
+    try{
+        await productsRepo.update(newProd);
+        res.status(201).json(newProd);
+    }catch(erro){
+        res.status(500).send({ error: "Erro ao alterar o produto" });
+    }
+
+});
+
 routes.put('/insertProduct', async(req:Request, res:Response)=>{
 
     const {name,price,description}= await req.body;
 
-    console.log(name,price,description)
 
     try {
         const product = await productsRepo.create(name,price,description); // Chamando o método create
-        res.status(201).json(product);
+        res.status(202).json(product);
     } catch (error) {
         res.status(500).send({ error: "Erro ao inserir o produto" });
     }
 
 });
+
 
 // aplicar as rotas na aplicação web backend. 
 app.use(routes);
