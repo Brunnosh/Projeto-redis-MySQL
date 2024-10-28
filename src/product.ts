@@ -1,3 +1,4 @@
+import exp from "constants"
 import { RowDataPacket } from "mysql2"
 
 export interface Product extends RowDataPacket {

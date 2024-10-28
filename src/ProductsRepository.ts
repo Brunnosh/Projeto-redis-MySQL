@@ -26,13 +26,14 @@ export class ProductsRepository {
     })
   }
 
-  create(p: Product): Promise<Product> {
+  create(name:string,price:number,description:string): Promise<Product> {
     return new Promise((resolve, reject) => {
-      conn.query<ResultSetHeader>(
-        "INSERT INTO PRODUCTS (name, price, description) VALUES(?,?,?)",
-        [p.name, p.price, p.description],
-        (err, res) => {
-          if (err) reject(err)
+      conn.query<ResultSetHeader>("INSERT INTO PRODUCTS (name, price, description) VALUES(?,?,?)",[name, price, description],(err, res) => {
+          if (err) 
+          {
+            reject(err);
+            //console.error(err)
+          }
           else
             this.getById(res.insertId)
               .then(user => resolve(user!))
