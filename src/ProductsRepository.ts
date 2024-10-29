@@ -58,17 +58,20 @@ export class ProductsRepository {
       )
     })
   }
-
-  delete(product_id: number): Promise<number> {
+  delete(product_id: number): Promise<number | undefined> {
     return new Promise((resolve, reject) => {
-      conn.query<ResultSetHeader>(
-        "DELETE FROM PRODUCTS WHERE id = ?",
-        [product_id],
-        (err, res) => {
-          if (err) reject(err)
-          else resolve(res.affectedRows)
-        }
-      )
-    })
-  }
+        conn.query<ResultSetHeader>(
+            "DELETE FROM PRODUCTS WHERE id = ?",
+            [product_id],
+            (err, res) => {
+                if (err) {
+                    reject(err);
+                } else if (res.affectedRows > 0) {
+                    resolve(res.affectedRows); // Retorna o número de linhas afetadas
+                } else {
+                    resolve(undefined); // Retorna undefined se nenhum produto foi deletado
+                }
+            }
+        );
+    });
 }

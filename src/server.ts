@@ -41,6 +41,19 @@ routes.put('/updateProduct', async(req:Request,res:Response)=>{
 
 });
 
+routes.delete('/deleteProduct', async (req: Request, res: Response) => {
+    const { id } = req.body; // Obtenha o ID do corpo da requisição
+    try {
+        const result = await productsRepo.delete(id); // Chama o método de exclusão no repositório
+       
+        res.status(200).send(); // Retorna 200 No Content em caso de sucesso
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ error: "Erro ao deletar o produto" });
+    }
+});
+
+
 routes.put('/insertProduct', async(req:Request, res:Response)=>{
 
     const {name,price,description}= await req.body;
@@ -54,6 +67,9 @@ routes.put('/insertProduct', async(req:Request, res:Response)=>{
     }
 
 });
+
+
+
 
 
 // aplicar as rotas na aplicação web backend. 
