@@ -3,6 +3,7 @@ import { Request, Response, Router } from "express";
 import {ProductsRepository} from "./ProductsRepository";
 import { Product } from "./product";
 import { close } from "fs";
+import {client, syncRedis} from "./redisClient"
 
 const app = express();
 const port = 3000;
@@ -78,6 +79,10 @@ routes.put('/insertProduct', async(req:Request, res:Response)=>{
 // aplicar as rotas na aplicação web backend. 
 app.use(routes);
 
-app.listen(3000, ()=>{
+app.listen(3000, async ()=>{
     console.log("Server is running on 3000");
+
+    await client.ping();
+    console.log("Redis connnected")
+    syncRedis()
 });
