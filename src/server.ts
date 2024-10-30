@@ -41,14 +41,17 @@ routes.put('/updateProduct', async(req:Request,res:Response)=>{
 
 });
 
-routes.delete('/deleteProduct', async (req: Request, res: Response) => {
-    const { id } = req.body; // Obtenha o ID do corpo da requisição
+routes.delete('/deleteProduct', async (req:Request,res:Response) => {
+    const  {id} = req.body;
+    console.log("parametro id :",id)
+
+    if (id === undefined)res.status(400).send({ error: "ID não está presente" });
+    
+
     try {
-        const result = await productsRepo.delete(id); // Chama o método de exclusão no repositório
-       
-        res.status(200).send(); // Retorna 200 No Content em caso de sucesso
+        await productsRepo.delete(id);
+        res.status(200).send(); // No Content
     } catch (error) {
-        console.error(error);
         res.status(500).send({ error: "Erro ao deletar o produto" });
     }
 });
