@@ -15,8 +15,14 @@ client.on('error', (err) => console.error('Redis Client Error', err));
     await client.connect();
 })();
 
+var qtd = 0; //var controlando qts vezes a func. syncRedis foi chamada
 
 async function syncRedis() {
+    
+
+    if(qtd != 0){await purgeRedis()}//se não tiver sido executada nenhuma vez, ou seja, ao iniciar o programa.
+    //não faz sentido purgar o redis, como ele não vai ter nada ou vai ter a mesma coisa que da ultima vez
+
     try{
         const products = await productsRepo.getAll();
         
@@ -29,29 +35,9 @@ async function syncRedis() {
 
 
         console.log("MySQL Carregado no redis")
+        qtd++;
     }
     catch(err){console.error("Erro ao carregar produtos", err)}
-}
-
-async function pesquisaRedis() {
-    
-}
-
-async function inserirRedis() {
-    
-}
-
-async function removerRedis() {
-    
-}
-
-async function updateRedis(product : Product) {
-    try {
-        await client.set(`product:${product.id}`, JSON.stringify(product));
-        console.log("Produto atualizado no Redis:", product);
-    } catch (error) {
-        console.error("Erro ao atualizar produto no Redis:", error);
-    }
 }
 
 async function purgeRedis() {
@@ -69,4 +55,4 @@ async function purgeRedis() {
 }
 
 
-export {client, syncRedis};
+export {client, syncRedis, purgeRedis};
