@@ -50,7 +50,7 @@ routes.delete('/deleteProduct', async (req:Request,res:Response) => {
 
     try {
         await productsRepo.delete(id);
-        res.status(200).send(); // No Content
+        res.status(200).send("Deletado com sucesso"); // No Content
     } catch (error) {
         res.status(500).send({ error: "Erro ao deletar o produto" });
     }
