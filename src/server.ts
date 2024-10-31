@@ -19,6 +19,8 @@ routes.get('/', (req: Request, res: Response)=>{
     res.send("Funcionando...");
 });
 
+//----------------------------------------------COMANDOS PARA TESTAR REDIS----------------------------------------------//
+
 routes.delete('/purgeRedis', async(req:Request, res:Response)=>{
     try{
         purgeRedis()
@@ -42,6 +44,8 @@ routes.get('/syncRedis',async(req:Request,res:Response)=>{
         res.status(500).send({ error: "Erro ao sincronizar redis" });
     }
 })
+
+//----------------------------------------------COMANDOS PARA TESTAR REDIS----------------------------------------------//
 
 routes.get('/getAllProducts', async (req: Request, res: Response) => {
     try {
@@ -67,7 +71,7 @@ routes.get('/getAllProducts', async (req: Request, res: Response) => {
 
 routes.put('/updateProduct', async(req:Request,res:Response)=>{
 
-    if(!checkRedisSync){await syncRedis();}
+    if(!checkRedisSync){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
 
     const {id, name, price, description} = req.body;
     const newProd = new Product(name,price,description,id);
@@ -86,7 +90,7 @@ routes.put('/updateProduct', async(req:Request,res:Response)=>{
 
 routes.delete('/deleteProduct', async (req:Request,res:Response) => {
     
-    if(!checkRedisSync){await syncRedis();}
+    if(!checkRedisSync){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
     
     const  {id} = req.body;
     console.log("parametro id :",id)
@@ -106,7 +110,7 @@ routes.delete('/deleteProduct', async (req:Request,res:Response) => {
 
 routes.put('/insertProduct', async(req:Request, res:Response)=>{
 
-    if(!checkRedisSync){await syncRedis();}
+    if(!checkRedisSync){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
 
     const {name,price,description}= await req.body;
 
@@ -134,5 +138,5 @@ app.listen(3000, async ()=>{
     await client.ping();
     console.log("Redis connnected")
     await syncRedis()
-    console.log(await checkRedisSync());
+    if(!checkRedisSync){await syncRedis();}
 });
