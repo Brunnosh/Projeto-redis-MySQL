@@ -1,3 +1,16 @@
+# Integrantes do grupo
+
+- *Vitor Hugo Amaro Aristides, RA: 20018040*
+
+- *Bruno Tasso Savoia, RA:22000354*
+
+- *Ryan Matheus moreira Barbosa, RA:22900872*
+
+# Fazendo funcionar
+
+- Digitar "npm i" no terminal para instalar todas as dependencias
+- criar e configurar o arquivo ".env" no diretório root com os dados do MySQL
+
 # Trabalho Datastore REDIS com BD Relacional.
 
 ### Regras
