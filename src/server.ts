@@ -3,7 +3,8 @@ import { Request, Response, Router } from "express";
 import {ProductsRepository} from "./ProductsRepository";
 import { Product } from "./product";
 import { close } from "fs";
-import {client, purgeRedis, syncRedis} from "./redisClient"
+import {checkRedisSync, client, purgeRedis, syncRedis} from "./redisClient"
+import { checkPrime } from "crypto";
 
 const app = express();
 const port = 3000;
@@ -27,15 +28,11 @@ routes.delete('/purgeRedis', async(req:Request, res:Response)=>{
     }
 });
 
-routes.put('/syncRedis', async(req:Request, res:Response)=>{
-    try {
-        syncRedis();
-        res.status(200).send("Redis syncado@@@@@@@");
-    } catch (error) {
-        res.status(500).send({ error: "Erro ao sincronizar redis" });
-    }
-
+routes.get('/checkRedisSync', async(req:Request,res:Response)=>{
+    console.log(await checkRedisSync());
+    res.status(200).send("")
 });
+
 
 routes.get('/syncRedis',async(req:Request,res:Response)=>{
     try{
@@ -46,17 +43,11 @@ routes.get('/syncRedis',async(req:Request,res:Response)=>{
     }
 })
 
-/*
-routes.get('/getAllProducts', async(req: Request, res: Response)=>{
-    // REFAZER PARA USAR O REDIS
-    const products = await productsRepo.getAll();
-    res.statusCode = 200; 
-    res.type('application/json')
-    res.send(products);
-});
-*/
 routes.get('/getAllProducts', async (req: Request, res: Response) => {
     try {
+
+        if(!checkRedisSync){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
+
         // Tenta buscar os produtos do Redis
         const keys = await client.keys('product:*'); // Busca todas as chaves de produtos
         console.log("Chaves encontradas no Redis:", keys);//garantindo que foi pego no redis 
@@ -65,7 +56,7 @@ routes.get('/getAllProducts', async (req: Request, res: Response) => {
             return JSON.parse(product!); // Converte o JSON de volta para um objeto
         }));
         console.log("products encontrado",products.length)
-
+        console.log("Produtos encontrados:", products)
         res.status(200).json(products); // Retorna os produtos encontrados
     } catch (err) {
         console.error("Erro ao buscar produtos no Redis", err);
@@ -74,8 +65,9 @@ routes.get('/getAllProducts', async (req: Request, res: Response) => {
 });
 
 
-
 routes.put('/updateProduct', async(req:Request,res:Response)=>{
+
+    if(!checkRedisSync){await syncRedis();}
 
     const {id, name, price, description} = req.body;
     const newProd = new Product(name,price,description,id);
@@ -93,6 +85,9 @@ routes.put('/updateProduct', async(req:Request,res:Response)=>{
 });
 
 routes.delete('/deleteProduct', async (req:Request,res:Response) => {
+    
+    if(!checkRedisSync){await syncRedis();}
+    
     const  {id} = req.body;
     console.log("parametro id :",id)
 
@@ -110,6 +105,8 @@ routes.delete('/deleteProduct', async (req:Request,res:Response) => {
 
 
 routes.put('/insertProduct', async(req:Request, res:Response)=>{
+
+    if(!checkRedisSync){await syncRedis();}
 
     const {name,price,description}= await req.body;
 
@@ -136,5 +133,6 @@ app.listen(3000, async ()=>{
 
     await client.ping();
     console.log("Redis connnected")
-    syncRedis()
+    await syncRedis()
+    console.log(await checkRedisSync());
 });

@@ -57,5 +57,42 @@ async function purgeRedis() {//* remove chaves antigas do Redis.
     }catch(err){console.error("Falha ao purgar", err)}
 }
 
+async function checkRedisSync():Promise<Boolean> {
+    
+    const productsDB = await productsRepo.getAll();
+    const keys = await client.keys('product:*');
+    const productsRedis : Product[] = await Promise.all(keys.map(async (key) => {
+        const product = await client.get(key); // Obtém cada produto do Redis
+        return JSON.parse(product!); // Converte o JSON de volta para um objeto
+    }));
 
-export {client, syncRedis, purgeRedis};
+        // Cria um `Map` dos produtos do Redis usando o ID como chave para comparação
+    const redisProductsMap = new Map(productsRedis.map(product => [product.ID, product]));
+
+    // Compara cada produto do banco com o correspondente no Redis
+    for (const productDB of productsDB) {
+        const productRedis = redisProductsMap.get(productDB.ID);
+        
+        // Verifica se o produto existe no Redis e se todos os campos são iguais
+        if (!productRedis ||productDB.NAME !== productRedis.NAME||productDB.PRICE !== productRedis.PRICE||productDB.DESCRIPTION !== productRedis.DESCRIPTION) {
+            return false;
+        }
+        
+    }
+
+
+    // Confere se todos os produtos do Redis estão no banco
+    const dbProductsMap = new Map(productsDB.map(product => [product.ID, product]));
+    for (const productRedis of productsRedis) {
+        const productDB = dbProductsMap.get(productRedis.ID);
+        if (!productDB) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+
+
+export {client, syncRedis, purgeRedis, checkRedisSync};
