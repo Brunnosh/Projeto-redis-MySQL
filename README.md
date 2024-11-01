@@ -11,6 +11,22 @@
 - Digitar "npm i" no terminal para instalar todas as dependencias
 - criar e configurar o arquivo ".env" no diretório root com os dados do MySQL
 
+# Funcionalidades implementadas e limitações
+
+- CRUD completo, com sincronização com redis acontecendo antes(se necessário) ou depois de cada operação.
+
+- Servidor carrega do MySQL toda a table produtos, cada vez que o servidor é iniciado, e, por precaução, após a sincronização inicial é feito uma checagem secundária de sincronização.
+
+- Como em cada operação ele checa se está sincronizado antes de efetuar a operação, é virtualmente impossivel perder a sincroniza (salvo erros externos), e tambem, fica seguro no caso de manipulação manual do banco de dados.
+
+  
+
+
+
+
+
+
+
 # Trabalho Datastore REDIS com BD Relacional.
 
 ### Regras
