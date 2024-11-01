@@ -2,7 +2,7 @@ import { createClient } from 'redis';
 import {ProductsRepository} from "./ProductsRepository";
 import { Product } from './product';
 
-const productsRepo = new ProductsRepository();// importação dos metodos do banco de dados
+const productsRepo = new ProductsRepository()
 
 //criando uma conexão com o banco de dados Redis.
 const client = createClient({
@@ -21,8 +21,9 @@ client.on('error', (err) => console.error('Redis Client Error', err));
 var qtd = 0;
 //função que sincroniza os produtos com o redis
 async function syncRedis() {
-    
-    if(qtd != 0){purgeRedis();}//limpando o redis antes de sincronizar novamente
+    console.log("SINCRONIZANDO REDIS....")
+
+    if(qtd != 0){await purgeRedis();}//limpando o redis antes de sincronizar novamente
 
     try{
         const products = await productsRepo.getAll();//pegando todos os itens da table products
@@ -59,12 +60,17 @@ async function purgeRedis() {//remove TUDO do Redis.
 
 async function checkRedisSync():Promise<Boolean> {//Função para checar a sincronia entre o banco de dados mySQL e o redis
     
+    console.log("CHECANDO SYNC REDIS")
+
     const productsDB = await productsRepo.getAll();
     const keys = await client.keys('product:*');
     const productsRedis : Product[] = await Promise.all(keys.map(async (key) => {
         const product = await client.get(key); // Obtém cada produto do Redis
         return JSON.parse(product!); // Converte o JSON de volta para um objeto
     }));
+
+    console.log(productsDB.length)
+    console.log(productsRedis.length)
 
     if (productsDB.length !== productsRedis.length) {
         console.error("Quantidade de produtos de cada banco é diferente")
@@ -97,7 +103,7 @@ async function checkRedisSync():Promise<Boolean> {//Função para checar a sincr
             return false;
         }
     }
-    console.log("true")
+    
     return true;
 }
 
@@ -107,6 +113,7 @@ async function deleteRedis(id : number) {
 }
 
 async function insertRedis(product : Product) {
+    console.log(product)
     await client.set( `product:${product.ID}`, JSON.stringify(product));
 }
 

@@ -60,8 +60,7 @@ routes.get('/getAllProducts', async (req: Request, res: Response) => {
             const product = await client.get(key); // Obtém cada produto do Redis
             return JSON.parse(product!); // Converte o JSON de volta para um objeto
         }));
-        console.log("products encontrado",products.length)
-        console.log("Produtos encontrados:", products)
+
         res.status(200).json(products); // Retorna os produtos encontrados
     } catch (err) {
         console.error("Erro ao buscar produtos no Redis", err);
@@ -77,7 +76,7 @@ routes.get('/getById', async(req:Request,res:Response)=>{
 
     if(!ID){console.error("ID OBRIGATORIO"); return}
 
-    console.log(`product:${ID} `)
+ 
 
     const product  = await client.get(`product:${ID}`);
     
@@ -101,15 +100,14 @@ routes.get('/getByName', async(req:Request,res:Response)=>{
     if(!nome){console.error("ID OBRIGATORIO"); return}
 
     const keys = await client.keys('product:*'); // Busca todas as chaves de produtos
-    console.log("Chaves encontradas no Redis:", keys);
 
     const products = await Promise.all(keys.map(async (key) => {
         const product = await client.get(key); // Obtém cada produto do Redis
         return JSON.parse(product!); // Converte o JSON de volta para um objeto
     }));
     
-    products.forEach(produto=>{
-        if(produto.NAME.toLowerCase().includes(nome.toLowerCase())){res.status(200).json(produto)}
+    products.forEach(product=>{
+        if(product.NAME.toLowerCase().includes(nome.toLowerCase())){res.status(200).json(product)}
     }); 
     
 });
@@ -141,7 +139,6 @@ routes.delete('/deleteProduct', async (req:Request,res:Response) => {
     if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
     
     const  {id} = req.body;
-    console.log("parametro id :",id)
 
     if (id === undefined)res.status(400).send({ error: "ID não está presente" });
     
@@ -161,14 +158,18 @@ routes.put('/insertProduct', async(req:Request, res:Response)=>{
     if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
 
     const {name,price,description}= await req.body;
+    const prodInserir = new Product(name,price,description);
 
 
     try {
-        const product = await productsRepo.create(name,price,description); // Chamando o método create
-        res.status(202).json(product);
-        insertRedis(product);//trocar para só inserir no redis, nao sincronizar tudo denovo
+        const result = await productsRepo.create(prodInserir); // Chamando o método create
+
+        insertRedis(result)
+        res.status(202).json(result);
+        //Sincronizando o redis todo apos uma insersão porque não consegui trazer o ID do produto da funcão create no productsRepo pra inserir no redis,
     } catch (error) {
         res.status(500).send({ error: "Erro ao inserir o produto" });
+        console.error(error)
     }
 
 });

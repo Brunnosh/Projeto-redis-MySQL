@@ -1,7 +1,7 @@
 import { ResultSetHeader } from "mysql2"
 import { conn } from "./db"
 import { Product } from "./product"
-import { insertRedis } from "./redisClient"
+import { client } from "./redisClient"
 
 export class ProductsRepository {
 
@@ -27,24 +27,19 @@ export class ProductsRepository {
     })
   }
 
-  create(name:string,price:number,description:string): Promise<Product> {
+  
+  create(p: Product): Promise<Product> {
     return new Promise((resolve, reject) => {
-      conn.query<ResultSetHeader>("INSERT INTO PRODUCTS (name, price, description) VALUES(?,?,?)",[name, price, description],(err, res) => {
-          if (err) 
-          {
-            reject(err);
-            //console.error(err)
-          }
+      conn.query<ResultSetHeader>(
+        "INSERT INTO PRODUCTS (name, price, description) VALUES(?,?,?)",
+        [p.name, p.price, p.description],
+        (err, res) => {
+          if (err) reject(err)
           else
-          {
-            const prodInserido = this.getById(res.insertId)
-            prodInserido.then(user => resolve(user!)).catch(reject)
-            //INSERIR NO REDIS AQUI
-
-          }
-
-            
-
+            this.getById(res.insertId)
+              .then(user => resolve(user!))
+              .catch(reject)
+              
         }
       )
     })
