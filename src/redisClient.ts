@@ -28,7 +28,7 @@ async function syncRedis() {
         
         
         products.forEach(async (product)=> {
-            await client.set( `product:${product.ID} `, JSON.stringify(product));//Itera sobre cada produto e armazena no Redis
+            await client.set( `product:${product.ID}`, JSON.stringify(product));//Itera sobre cada produto e armazena no Redis
             
         })
 
@@ -96,7 +96,7 @@ async function checkRedisSync():Promise<Boolean> {//Função para checar a sincr
             return false;
         }
     }
-    
+    console.log("true")
     return true;
 }
 

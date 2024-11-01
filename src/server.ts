@@ -5,6 +5,7 @@ import { Product } from "./product";
 import { close } from "fs";
 import {checkRedisSync, client, purgeRedis, syncRedis} from "./redisClient"
 import { checkPrime } from "crypto";
+import { error } from "console";
 
 const app = express();
 const port = 3000;
@@ -50,7 +51,7 @@ routes.get('/syncRedis',async(req:Request,res:Response)=>{
 routes.get('/getAllProducts', async (req: Request, res: Response) => {
     try {
 
-        if(!checkRedisSync){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
+        if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
 
         // Tenta buscar os produtos do Redis
         const keys = await client.keys('product:*'); // Busca todas as chaves de produtos
@@ -68,10 +69,56 @@ routes.get('/getAllProducts', async (req: Request, res: Response) => {
     }
 });
 
+routes.get('/getById', async(req:Request,res:Response)=>{
+    
+    if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
+
+    const ID = req.body.ID;
+
+    if(!ID){console.error("ID OBRIGATORIO"); return}
+
+    console.log(`product:${ID} `)
+
+    const product  = await client.get(`product:${ID}`);
+    
+
+    if(product)
+    {res.status(200).json(JSON.parse(product))
+
+    }else
+    {res.status(400).json({message:"Nenhum produto com tal ID"})};
+
+
+    
+});
+
+
+routes.get('/getByName', async(req:Request,res:Response)=>{
+    if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
+
+    const nome = req.body.NAME;
+
+    if(!nome){console.error("ID OBRIGATORIO"); return}
+
+    const keys = await client.keys('product:*'); // Busca todas as chaves de produtos
+    console.log("Chaves encontradas no Redis:", keys);
+
+    const products = await Promise.all(keys.map(async (key) => {
+        const product = await client.get(key); // Obtém cada produto do Redis
+        return JSON.parse(product!); // Converte o JSON de volta para um objeto
+    }));
+    
+    products.forEach(produto=>{
+        if(produto.NAME.toLowerCase().includes(nome.toLowerCase())){res.status(200).json(produto)}
+    }); 
+    
+});
+
+
 
 routes.put('/updateProduct', async(req:Request,res:Response)=>{
 
-    if(!checkRedisSync){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
+    if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
 
     const {id, name, price, description} = req.body;
     const newProd = new Product(name,price,description,id);
@@ -90,7 +137,7 @@ routes.put('/updateProduct', async(req:Request,res:Response)=>{
 
 routes.delete('/deleteProduct', async (req:Request,res:Response) => {
     
-    if(!checkRedisSync){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
+    if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
     
     const  {id} = req.body;
     console.log("parametro id :",id)
@@ -110,7 +157,7 @@ routes.delete('/deleteProduct', async (req:Request,res:Response) => {
 
 routes.put('/insertProduct', async(req:Request, res:Response)=>{
 
-    if(!checkRedisSync){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
+    if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
 
     const {name,price,description}= await req.body;
 
