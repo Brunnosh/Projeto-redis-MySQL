@@ -19,14 +19,7 @@
 
 - Como em cada operação ele checa se está sincronizado antes de efetuar a operação, é virtualmente impossivel perder a sincroniza (salvo erros externos), e tambem, fica seguro no caso de manipulação manual do banco de dados.
 
-
-
-
-
-
-
-  
-
+- 
 
 
 
@@ -57,8 +50,6 @@ Então, você terá que adaptar o código fornecido para que:
 ### Aspectos importantes da solução:
 
 Não pode perder a sincronia entre MySQL e Redis. Qualquer perda de sincronia afetará completamente a solução (via backend)
-
-Se o banco de dados for manipulado manualmente, no caso deste trabalho, é possível compreender que todo o sistema ficará comprometido. Mas, se houvesse a necessidade de sincronizar o REDIS novamente, como você faria? Caso houvesse edição manual dos dados diretamente no MySQL? 
 
 ### Entrega: 
 
