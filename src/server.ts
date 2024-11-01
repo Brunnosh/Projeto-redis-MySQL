@@ -44,7 +44,7 @@ routes.get('/getAllProducts', async (req: Request, res: Response) => {
     try {
 
         if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
-
+        console.time()
         // Tenta buscar os produtos do Redis
         const keys = await client.keys('product:*'); // Busca todas as chaves de produtos
         console.log("Chaves encontradas no Redis:", keys);//garantindo que foi pego no redis 
@@ -52,7 +52,7 @@ routes.get('/getAllProducts', async (req: Request, res: Response) => {
             const product = await client.get(key); // Obtém cada produto do Redis
             return JSON.parse(product!); // Converte o JSON de volta para um objeto
         }));
-
+        console.timeEnd()
         res.status(200).json(products); // Retorna os produtos encontrados
     } catch (err) {
         console.error("Erro ao buscar produtos no Redis", err);
@@ -148,7 +148,6 @@ routes.delete('/deleteProduct', async (req:Request,res:Response) => {
 routes.put('/insertProduct', async(req:Request, res:Response)=>{
 
     if (!(await checkRedisSync())){await syncRedis();}//checagem para ver se redis e o mysql estao sincronizados, se nao estiverem, efetuar sincronizacao
-
     const {name,price,description}= await req.body;
     const prodInserir = new Product(name,price,description);
 
