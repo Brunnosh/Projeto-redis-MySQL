@@ -1,6 +1,7 @@
 import { ResultSetHeader } from "mysql2"
 import { conn } from "./db"
 import { Product } from "./product"
+import { insertRedis } from "./redisClient"
 
 export class ProductsRepository {
 
@@ -35,8 +36,15 @@ export class ProductsRepository {
             //console.error(err)
           }
           else
-            this.getById(res.insertId).then(user => resolve(user!))
-              .catch(reject)
+          {
+            const prodInserido = this.getById(res.insertId)
+            prodInserido.then(user => resolve(user!)).catch(reject)
+            //INSERIR NO REDIS AQUI
+
+          }
+
+            
+
         }
       )
     })
