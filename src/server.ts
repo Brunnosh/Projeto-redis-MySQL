@@ -37,26 +37,22 @@ routes.put('/syncRedis', async(req:Request, res:Response)=>{
 
 });
 
-routes.get('/syncRedis',async(req:Request,res:Response)=>{
-    try{
-        syncRedis();
-        res.status(200).send("Redis syncado!!!!!!!");
-    } catch (error) {
-        res.status(500).send({ error: "Erro ao sincronizar redis" });
-    }
-})
 
 /*
 routes.get('/getAllProducts', async(req: Request, res: Response)=>{
+    console.time()
     // REFAZER PARA USAR O REDIS
     const products = await productsRepo.getAll();
+    console.timeEnd()
     res.statusCode = 200; 
     res.type('application/json')
     res.send(products);
 });
 */
+
 routes.get('/getAllProducts', async (req: Request, res: Response) => {
     try {
+        console.time()
         // Tenta buscar os produtos do Redis
         const keys = await client.keys('product:*'); // Busca todas as chaves de produtos
         console.log("Chaves encontradas no Redis:", keys);//garantindo que foi pego no redis 
@@ -64,6 +60,7 @@ routes.get('/getAllProducts', async (req: Request, res: Response) => {
             const product = await client.get(key); // Obtém cada produto do Redis
             return JSON.parse(product!); // Converte o JSON de volta para um objeto
         }));
+        console.timeEnd()
         console.log("products encontrado",products.length)
 
         res.status(200).json(products); // Retorna os produtos encontrados
@@ -72,6 +69,7 @@ routes.get('/getAllProducts', async (req: Request, res: Response) => {
         res.status(500).json({ message: "Erro interno ao buscar produtos." });
     }
 });
+
 
 
 
