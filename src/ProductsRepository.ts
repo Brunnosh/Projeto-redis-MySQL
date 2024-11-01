@@ -35,8 +35,7 @@ export class ProductsRepository {
             //console.error(err)
           }
           else
-            this.getById(res.insertId)
-              .then(user => resolve(user!))
+            this.getById(res.insertId).then(user => resolve(user!))
               .catch(reject)
         }
       )

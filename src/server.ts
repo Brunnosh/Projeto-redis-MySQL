@@ -3,7 +3,7 @@ import { Request, Response, Router } from "express";
 import {ProductsRepository} from "./ProductsRepository";
 import { Product } from "./product";
 import { close } from "fs";
-import {checkRedisSync, client, purgeRedis, syncRedis} from "./redisClient"
+import {checkRedisSync, client, deleteRedis, insertRedis, purgeRedis, syncRedis, updateRedis} from "./redisClient"
 import { checkPrime } from "crypto";
 import { error } from "console";
 
@@ -129,6 +129,7 @@ routes.put('/updateProduct', async(req:Request,res:Response)=>{
         await productsRepo.update(newProd);
         res.status(201).json(newProd);
         syncRedis();
+        updateRedis(newProd);
     }catch(erro){
         res.status(500).send({ error: "Erro ao alterar o produto" });
     }
@@ -148,7 +149,7 @@ routes.delete('/deleteProduct', async (req:Request,res:Response) => {
     try {
         await productsRepo.delete(id);
         res.status(200).send("item deletado com sucesso"); // No Content
-        syncRedis();
+        deleteRedis(id);
     } catch (error) {
         res.status(500).send({ error: "Erro ao deletar o produto" });
     }
@@ -165,7 +166,7 @@ routes.put('/insertProduct', async(req:Request, res:Response)=>{
     try {
         const product = await productsRepo.create(name,price,description); // Chamando o método create
         res.status(202).json(product);
-        syncRedis();
+        insertRedis(product);//trocar para só inserir no redis, nao sincronizar tudo denovo
     } catch (error) {
         res.status(500).send({ error: "Erro ao inserir o produto" });
     }

@@ -13,6 +13,8 @@ client.on('error', (err) => console.error('Redis Client Error', err));
 
 (async () => {
     await client.connect();
+
+
 })();//iniciando a conexão com o redis
 
 
@@ -40,7 +42,6 @@ async function syncRedis() {
 
     qtd++
 }
-
 
 async function purgeRedis() {//remove TUDO do Redis.
     try{
@@ -100,6 +101,19 @@ async function checkRedisSync():Promise<Boolean> {//Função para checar a sincr
     return true;
 }
 
+async function deleteRedis(id : number) {
+    await client.del(`product:${id}`);
+    
+}
+
+async function insertRedis(product : Product) {
+    await client.set( `product:${product.ID}`, JSON.stringify(product));
+}
+
+async function updateRedis(product : Product) {
+    await client.set( `product:${product.ID}`, JSON.stringify(product));
+}
 
 
-export {client, syncRedis, purgeRedis, checkRedisSync};
+
+export {client, syncRedis, purgeRedis, checkRedisSync, insertRedis, deleteRedis, updateRedis};
