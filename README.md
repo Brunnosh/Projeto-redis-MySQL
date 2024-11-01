@@ -19,6 +19,12 @@
 
 - Como em cada operação ele checa se está sincronizado antes de efetuar a operação, é virtualmente impossivel perder a sincroniza (salvo erros externos), e tambem, fica seguro no caso de manipulação manual do banco de dados.
 
+
+
+
+
+
+
   
 
 
